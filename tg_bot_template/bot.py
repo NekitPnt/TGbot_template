@@ -2,16 +2,15 @@ import asyncio
 import os
 
 import aioschedule
-from aiogram.dispatcher.filters import Text
-from aiogram.utils import executor
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
+from aiogram.dispatcher.filters import Text
+from aiogram.utils import executor
+from loguru import logger
 
 from tg_bot_template import messages, db
 from tg_bot_template.filters import RegistrationFilter, NonRegistrationFilter, CreatorFilter
-from tg_bot_template.utils import create_logger
 
-bot_logger = create_logger("bot_logs")
 TOKEN = os.getenv("TG_BOT_TOKEN")
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
@@ -63,14 +62,14 @@ async def handle_wrong_text_msg(msg: types.Message):
 
 # ---------------------------------------- SCHEDULED FEATURES ---------------------------------------
 async def healthcheck():
-    bot_logger.info(messages.ping_ftr.text2)
+    logger.info(messages.ping_ftr.text2)
     if creator_id := os.getenv("CREATOR_ID", None) is not None:
         await bot.send_message(creator_id, messages.ping_ftr.text2)
 
 
 # -------------------------------------------- BOT SETUP --------------------------------------------
 async def bot_scheduler():
-    bot_logger.info('Scheduler is up')
+    logger.info('Scheduler is up')
     aioschedule.every().day.at("10:00").do(healthcheck)
 
     while True:
@@ -79,7 +78,7 @@ async def bot_scheduler():
 
 
 async def on_startup(dispatcher):
-    bot_logger.info('Bot is up')
+    logger.info('Bot is up')
 
     # bot commands setup
     cmds = [messages.start_ftr, messages.help_ftr]

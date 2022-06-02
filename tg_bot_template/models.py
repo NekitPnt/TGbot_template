@@ -1,12 +1,10 @@
 import asyncio
 import os
+
 import peewee
 import peewee_async
 import playhouse.migrate
-
-from tg_bot_template.utils import create_logger
-
-db_logger = create_logger("DB_logs")
+from loguru import logger
 
 # -------------------------------------------- DB INIT --------------------------------------------
 database = peewee_async.PooledPostgresqlDatabase(
@@ -35,13 +33,13 @@ ALL_TABLES = [Users]
 def dev_drop_tables(db: peewee_async.PooledPostgresqlDatabase, tables: list):
     with db:
         db.drop_tables(tables, safe=True)
-    db_logger.info('Tables dropped')
+    logger.info('Tables dropped')
 
 
 def create_tables(db: peewee_async.PooledPostgresqlDatabase, tables: list):
     with db:
         db.create_tables(tables, safe=True)
-    db_logger.info('Tables created')
+    logger.info('Tables created')
 
 
 def make_migrations():
@@ -52,7 +50,7 @@ def make_migrations():
                 # migrator.alter_column_type('users', 'social_id', peewee.BigIntegerField(null=False)),
                 # migrator.add_column('users', 'channel_id', peewee.CharField(null=False, max_length=50))
             )
-        db_logger.info('Tables migrated')
+        logger.info('Tables migrated')
     except peewee.ProgrammingError:
         pass
 
