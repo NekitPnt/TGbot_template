@@ -8,11 +8,11 @@ from aiogram.dispatcher.filters import Text
 from aiogram.utils import executor
 from loguru import logger
 
-from tg_bot_template import messages, db
-from tg_bot_template.filters import RegistrationFilter, NonRegistrationFilter, CreatorFilter
+from tg_bot_template.bot_content import messages
+from tg_bot_template.db_infra import db
+from tg_bot_template.bot_infra.filters import RegistrationFilter, NonRegistrationFilter, CreatorFilter
 
-TOKEN = os.getenv("TG_BOT_TOKEN")
-bot = Bot(token=TOKEN)
+bot = Bot(token=os.getenv("TG_BOT_TOKEN"))
 dp = Dispatcher(bot)
 
 # filters binding
@@ -29,7 +29,7 @@ async def ping(msg: types.Message):
 
 @dp.message_handler(Text(equals=["creator"], ignore_case=True), is_creator=True)
 async def creator_filter_check(msg: types.Message):
-    await msg.answer("Master?")
+    await msg.answer("*Master?*", parse_mode=types.ParseMode.MARKDOWN)
 
 
 @dp.message_handler(Text(equals=messages.start_ftr.triggers, ignore_case=True), is_registered=True)

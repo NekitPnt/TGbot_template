@@ -5,7 +5,7 @@ from aiocache import cached
 from aiocache.serializers import PickleSerializer
 from loguru import logger
 
-from tg_bot_template.models import conn, Users
+from tg_bot_template.db_infra.models import conn, Users
 
 
 @cached(ttl=0.2, serializer=PickleSerializer())

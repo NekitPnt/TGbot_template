@@ -2,7 +2,7 @@ import os
 from aiogram import types
 from aiogram.dispatcher.filters import BoundFilter
 
-from tg_bot_template.db import check_user_registered
+from tg_bot_template.db_infra.db import check_user_registered
 
 CREATOR_ID = os.getenv("CREATOR_ID", None)
 
