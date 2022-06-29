@@ -63,7 +63,7 @@ async def handle_wrong_text_msg(msg: types.Message):
 # ---------------------------------------- SCHEDULED FEATURES ---------------------------------------
 async def healthcheck():
     logger.info(messages.ping_ftr.text2)
-    if creator_id := os.getenv("CREATOR_ID", None) is not None:
+    if (creator_id := os.getenv("CREATOR_ID", None)) is not None:
         await bot.send_message(creator_id, messages.ping_ftr.text2)
 
 
