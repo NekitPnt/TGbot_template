@@ -33,13 +33,13 @@ ALL_TABLES = [Users]
 def dev_drop_tables(db: peewee_async.PooledPostgresqlDatabase, tables: list):
     with db:
         db.drop_tables(tables, safe=True)
-    logger.info('Tables dropped')
+    logger.info("Tables dropped")
 
 
 def create_tables(db: peewee_async.PooledPostgresqlDatabase, tables: list):
     with db:
         db.create_tables(tables, safe=True)
-    logger.info('Tables created')
+    logger.info("Tables created")
 
 
 def make_migrations():
@@ -47,10 +47,10 @@ def make_migrations():
     try:
         with database.atomic():
             playhouse.migrate.migrate(
-                # migrator.alter_column_type('users', 'social_id', peewee.BigIntegerField(null=False)),
-                # migrator.add_column('users', 'channel_id', peewee.CharField(null=False, max_length=50))
+                # migrator.alter_column_type("users", "social_id", peewee.BigIntegerField(null=False)),
+                # migrator.add_column("users", "channel_id", peewee.CharField(null=False, max_length=50))
             )
-        logger.info('Tables migrated')
+        logger.info("Tables migrated")
     except peewee.ProgrammingError:
         pass
 

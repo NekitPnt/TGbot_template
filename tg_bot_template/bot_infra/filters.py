@@ -8,7 +8,7 @@ CREATOR_ID = os.getenv("CREATOR_ID", None)
 
 
 class AbsFilter(BoundFilter):
-    key = 'key'
+    key = "key"
 
     def __init__(self, **kwargs):
         setattr(self, self.key, kwargs[self.key])
@@ -18,21 +18,21 @@ class AbsFilter(BoundFilter):
 
 
 class CreatorFilter(AbsFilter):
-    key = 'is_creator'
+    key = "creator"
 
     async def check(self, msg: types.Message):
         return CREATOR_ID is None or str(msg.from_user.id) == CREATOR_ID
 
 
 class RegistrationFilter(AbsFilter):
-    key = 'is_registered'
+    key = "registered"
 
     async def check(self, msg: types.Message):
         return await check_user_registered(msg.from_user.id)
 
 
 class NonRegistrationFilter(AbsFilter):
-    key = 'is_not_registered'
+    key = "not_registered"
 
     async def check(self, msg: types.Message):
         return not await check_user_registered(msg.from_user.id)

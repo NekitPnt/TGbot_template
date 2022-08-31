@@ -3,7 +3,7 @@ import os
 
 import aioschedule
 from aiogram import Bot, types
-from aiogram.dispatcher import Dispatcher
+from aiogram.dispatcher import Dispatcher, FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.utils import executor
 from loguru import logger
@@ -27,22 +27,32 @@ async def ping(msg: types.Message):
     await msg.answer(messages.ping_ftr.text)
 
 
-@dp.message_handler(Text(equals=["creator"], ignore_case=True), is_creator=True)
+@dp.message_handler(Text(equals=["creator"], ignore_case=True), creator=True)
 async def creator_filter_check(msg: types.Message):
     await msg.answer("*Master?*", parse_mode=types.ParseMode.MARKDOWN)
 
 
-@dp.message_handler(Text(equals=messages.start_ftr.triggers, ignore_case=True), is_registered=True)
+@dp.message_handler(Text(equals=messages.start_ftr.triggers, ignore_case=True), registered=True)
 async def start(msg: types.Message):
     await msg.answer(messages.start_ftr.text, reply_markup=messages.start_ftr.kb)
 
 
-@dp.message_handler(Text(equals=messages.help_ftr.triggers, ignore_case=True), is_registered=True)
+@dp.message_handler(Text(equals=messages.help_ftr.triggers, ignore_case=True), registered=True)
 async def help_feature(msg: types.Message):
     await msg.answer(messages.help_ftr.text, reply_markup=messages.empty.kb)
 
 
-@dp.message_handler(content_types=['any'], is_not_registered=True)
+@dp.message_handler(Text(equals=messages.cancel_ftr.triggers, ignore_case=True), state="*")
+async def cancel_command(msg: types.Message, state: FSMContext):
+    await msg.answer(messages.cancel_ftr.text)
+    await msg.answer(messages.start_ftr.text, reply_markup=messages.start_ftr.kb)
+
+    current_state = await state.get_state()
+    if current_state is not None:
+        await state.finish()
+
+
+@dp.message_handler(content_types=["any"], not_registered=True)
 async def registration(msg: types.Message):
     if messages.register_ftr.find_triggers(msg):
         if msg.from_user.username:
@@ -55,21 +65,28 @@ async def registration(msg: types.Message):
         await msg.answer(messages.please_register, reply_markup=messages.empty.kb)
 
 
-@dp.message_handler(content_types=['any'], is_registered=True)
+@dp.message_handler(content_types=["any"], registered=True)
 async def handle_wrong_text_msg(msg: types.Message):
     await msg.answer(messages.text_error)
+
+
+async def bot_safe_send_message(social_id: int, text: str, **kwargs):
+    try:
+        await bot.send_message(social_id, text, **kwargs)
+    except Exception:
+        logger.warning(f"User with {social_id = } did not receive the message.")
 
 
 # ---------------------------------------- SCHEDULED FEATURES ---------------------------------------
 async def healthcheck():
     logger.info(messages.ping_ftr.text2)
     if (creator_id := os.getenv("CREATOR_ID", None)) is not None:
-        await bot.send_message(creator_id, messages.ping_ftr.text2)
+        await bot_safe_send_message(int(creator_id), messages.ping_ftr.text2)
 
 
 # -------------------------------------------- BOT SETUP --------------------------------------------
 async def bot_scheduler():
-    logger.info('Scheduler is up')
+    logger.info("Scheduler is up")
     aioschedule.every().day.at("10:00").do(healthcheck)
 
     while True:
@@ -78,7 +95,7 @@ async def bot_scheduler():
 
 
 async def on_startup(dispatcher):
-    logger.info('Bot is up')
+    logger.info("Bot is up")
 
     # bot commands setup
     cmds = [messages.start_ftr, messages.help_ftr]
@@ -89,5 +106,5 @@ async def on_startup(dispatcher):
     asyncio.create_task(bot_scheduler())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     executor.start_polling(dp, on_startup=on_startup)
