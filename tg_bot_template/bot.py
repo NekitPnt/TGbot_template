@@ -1,19 +1,21 @@
 import asyncio
 import os
-
 import aioschedule
+from loguru import logger
+
 from aiogram import Bot, types
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import Dispatcher, FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.utils import executor
-from loguru import logger
 
 from tg_bot_template.bot_content import messages
 from tg_bot_template.db_infra import db
 from tg_bot_template.bot_infra.filters import RegistrationFilter, NonRegistrationFilter, CreatorFilter
 
 bot = Bot(token=os.getenv("TG_BOT_TOKEN"))
-dp = Dispatcher(bot)
+storage = MemoryStorage()
+dp = Dispatcher(bot, storage=storage)
 
 # filters binding
 dp.filters_factory.bind(CreatorFilter)
