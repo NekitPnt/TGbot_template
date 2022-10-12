@@ -27,7 +27,7 @@ dp.filters_factory.bind(NonRegistrationFilter)
 # -------------------------------------------- HANDLERS --------------------------------------------
 @dp.message_handler(lambda message: features.ping_ftr.find_triggers(message))
 async def ping(msg: types.Message):
-    await msg.answer(features.ping_ftr.text)
+    await bot_safe_send_message(msg.from_user.id, features.ping_ftr.text * 1111)
 
 
 @dp.message_handler(Text(equals=["creator"], ignore_case=True), creator=True)
@@ -55,6 +55,15 @@ async def cancel_command(msg: types.Message, state: FSMContext):
         await state.finish()
 
 
+@dp.callback_query_handler(Text(equals=features.cancel_ftr.triggers, ignore_case=True), state="*")
+async def cancel_callback(callback: types.CallbackQuery, state: FSMContext):
+    await bot_edit_callback_message(callback, features.cancel_ftr.text)
+    await bot_safe_send_message(callback.from_user.id, features.start_ftr.text, reply_markup=features.start_ftr.kb)
+
+    if await state.get_state() is not None:
+        await state.finish()
+
+
 @dp.message_handler(content_types=["any"], not_registered=True)
 async def registration(msg: types.Message):
     if features.register_ftr.find_triggers(msg):
@@ -75,9 +84,25 @@ async def handle_wrong_text_msg(msg: types.Message):
 
 async def bot_safe_send_message(social_id: int, text: str, **kwargs):
     try:
-        await bot.send_message(social_id, text, **kwargs)
+        text_arr = features.Feature.tg_msg_text_split(text)
+        for mes in text_arr:
+            await bot.send_message(social_id, mes, **kwargs)
     except Exception:
         logger.warning(f"User with {social_id = } did not receive the message.")
+
+
+async def bot_safe_send_photo(social_id: int, photo, **kwargs):
+    try:
+        await bot.send_photo(social_id, photo, **kwargs)
+    except Exception as e:
+        logger.warning(f"User with {social_id = } did not receive the photo.\nError: {e}")
+
+
+async def bot_edit_callback_message(callback: types.CallbackQuery, text: str, **kwargs):
+    try:
+        await bot.edit_message_text(text, callback.from_user.id, callback.message.message_id, **kwargs)
+    except Exception as e:
+        logger.warning(f"Cant edit callback message for {callback = }.\nError: {e}")
 
 
 # ---------------------------------------- SCHEDULED FEATURES ---------------------------------------

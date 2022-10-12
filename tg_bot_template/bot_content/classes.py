@@ -93,14 +93,14 @@ class Feature(BaseModel):
     def menu_line(self) -> str:
         return f"{self.emoji}{self.slashed_command} — {self.about}"
 
+    @staticmethod
+    def text_cutter(text: str, text_size: int) -> list[str]:
+        return [text[x:x + text_size] for x in range(0, len(text), text_size)]
 
-def text_cutter(text: str, text_size: int) -> list[str]:
-    return [text[x:x + text_size] for x in range(0, len(text), text_size)]
+    @classmethod
+    def tg_msg_text_split(cls, text: str) -> list[str]:
+        return [mes for mes in cls.text_cutter(text, 4096)]
 
-
-def text_split(text: str) -> list[str]:
-    return [mes for mes in text_cutter(text, 4096)]
-
-
-def get_username(text: str) -> str:
-    return text.replace(Emojis().dog, "").replace(Emojis().t_me_link, "")
+    @staticmethod
+    def tg_get_username(text: str) -> str:
+        return text.replace(Emojis().dog, "").replace(Emojis().t_me_link, "")
