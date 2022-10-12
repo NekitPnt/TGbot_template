@@ -1,7 +1,6 @@
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
 
-# States
-class Form(StatesGroup):
+class UserForm(StatesGroup):
     name = State()
     username = State()

@@ -9,7 +9,8 @@ from aiogram.dispatcher import Dispatcher, FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.utils import executor
 
-from tg_bot_template.bot_content import messages
+from config import SCHEDULE_HEALTHCHECK
+from tg_bot_template.bot_content import features
 from tg_bot_template.db_infra import db
 from tg_bot_template.bot_infra.filters import RegistrationFilter, NonRegistrationFilter, CreatorFilter
 
@@ -24,9 +25,9 @@ dp.filters_factory.bind(NonRegistrationFilter)
 
 
 # -------------------------------------------- HANDLERS --------------------------------------------
-@dp.message_handler(lambda message: messages.ping_ftr.find_triggers(message))
+@dp.message_handler(lambda message: features.ping_ftr.find_triggers(message))
 async def ping(msg: types.Message):
-    await msg.answer(messages.ping_ftr.text)
+    await msg.answer(features.ping_ftr.text)
 
 
 @dp.message_handler(Text(equals=["creator"], ignore_case=True), creator=True)
@@ -34,20 +35,20 @@ async def creator_filter_check(msg: types.Message):
     await msg.answer("*Master?*", parse_mode=types.ParseMode.MARKDOWN)
 
 
-@dp.message_handler(Text(equals=messages.start_ftr.triggers, ignore_case=True), registered=True)
+@dp.message_handler(Text(equals=features.start_ftr.triggers, ignore_case=True), registered=True)
 async def start(msg: types.Message):
-    await msg.answer(messages.start_ftr.text, reply_markup=messages.start_ftr.kb)
+    await msg.answer(features.start_ftr.text, reply_markup=features.start_ftr.kb)
 
 
-@dp.message_handler(Text(equals=messages.help_ftr.triggers, ignore_case=True), registered=True)
+@dp.message_handler(Text(equals=features.help_ftr.triggers, ignore_case=True), registered=True)
 async def help_feature(msg: types.Message):
-    await msg.answer(messages.help_ftr.text, reply_markup=messages.empty.kb)
+    await msg.answer(features.help_ftr.text, reply_markup=features.empty.kb)
 
 
-@dp.message_handler(Text(equals=messages.cancel_ftr.triggers, ignore_case=True), state="*")
+@dp.message_handler(Text(equals=features.cancel_ftr.triggers, ignore_case=True), state="*")
 async def cancel_command(msg: types.Message, state: FSMContext):
-    await msg.answer(messages.cancel_ftr.text)
-    await msg.answer(messages.start_ftr.text, reply_markup=messages.start_ftr.kb)
+    await msg.answer(features.cancel_ftr.text)
+    await msg.answer(features.start_ftr.text, reply_markup=features.start_ftr.kb)
 
     current_state = await state.get_state()
     if current_state is not None:
@@ -56,20 +57,20 @@ async def cancel_command(msg: types.Message, state: FSMContext):
 
 @dp.message_handler(content_types=["any"], not_registered=True)
 async def registration(msg: types.Message):
-    if messages.register_ftr.find_triggers(msg):
+    if features.register_ftr.find_triggers(msg):
         if msg.from_user.username:
             await db.create_user(user_social_id=msg.from_user.id, username=msg.from_user.username)
-            await msg.answer(messages.register_ftr.text)
-            await msg.answer(messages.start_ftr.text, reply_markup=messages.start_ftr.kb)
+            await msg.answer(features.register_ftr.text)
+            await msg.answer(features.start_ftr.text, reply_markup=features.start_ftr.kb)
         else:
-            await msg.answer(messages.register_failed)
+            await msg.answer(features.register_failed)
     else:
-        await msg.answer(messages.please_register, reply_markup=messages.empty.kb)
+        await msg.answer(features.please_register, reply_markup=features.empty.kb)
 
 
 @dp.message_handler(content_types=["any"], registered=True)
 async def handle_wrong_text_msg(msg: types.Message):
-    await msg.answer(messages.text_error)
+    await msg.answer(features.text_error)
 
 
 async def bot_safe_send_message(social_id: int, text: str, **kwargs):
@@ -81,15 +82,15 @@ async def bot_safe_send_message(social_id: int, text: str, **kwargs):
 
 # ---------------------------------------- SCHEDULED FEATURES ---------------------------------------
 async def healthcheck():
-    logger.info(messages.ping_ftr.text2)
+    logger.info(features.ping_ftr.text2)
     if (creator_id := os.getenv("CREATOR_ID", None)) is not None:
-        await bot_safe_send_message(int(creator_id), messages.ping_ftr.text2)
+        await bot_safe_send_message(int(creator_id), features.ping_ftr.text2)
 
 
 # -------------------------------------------- BOT SETUP --------------------------------------------
 async def bot_scheduler():
     logger.info("Scheduler is up")
-    aioschedule.every().day.at("10:00").do(healthcheck)
+    aioschedule.every().day.at(SCHEDULE_HEALTHCHECK).do(healthcheck)
 
     while True:
         await aioschedule.run_pending()
@@ -100,7 +101,7 @@ async def on_startup(dispatcher):
     logger.info("Bot is up")
 
     # bot commands setup
-    cmds = [messages.start_ftr, messages.help_ftr]
+    cmds = features.BOT_COMMAND_FEATURES_LIST
     bot_commands = [types.BotCommand(ftr.slashed_command, ftr.slashed_command_descr) for ftr in cmds]
     await dispatcher.bot.set_my_commands(bot_commands)
 

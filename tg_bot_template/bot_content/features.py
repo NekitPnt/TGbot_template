@@ -1,26 +1,26 @@
-from tg_bot_template.bot_content.classes import Ftr, Button
+from tg_bot_template.bot_content.classes import Feature, Button
 
-ping_ftr = Ftr(
+ping_ftr = Feature(
     commands=["ping", "health", "healthcheck"],
     text="200 pong",
     text2="Bot is alive",
 )
-empty = Ftr()
-start_ftr = Ftr(
+empty = Feature()
+start_ftr = Feature(
     slashed_command="/start",
     slashed_command_descr="start bot",
     text="Hello there",
 )
-help_ftr = Ftr(
+help_ftr = Feature(
     slashed_command="/help",
     slashed_command_descr="bot help",
     text="Here will be help anytime",
 )
-register_ftr = Ftr(
+register_ftr = Feature(
     commands=["bot"],
     text=f"Welcome to bot"
 )
-cancel_ftr = Ftr(
+cancel_ftr = Feature(
     slashed_command="/cancel",
     button="Отмена",
     text="Принял, отбой, возвращаюсь в главное меню.",
@@ -30,3 +30,5 @@ register_failed = "Для регистрации заполните, пожал�
                   " другие участники!"
 please_register = "Enter passphrase for register in bot:"
 text_error = "What? Dont understand."
+
+BOT_COMMAND_FEATURES_LIST = [start_ftr, help_ftr]
