@@ -9,7 +9,7 @@ from aiogram.dispatcher import Dispatcher, FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.utils import executor
 
-from config import SCHEDULE_HEALTHCHECK
+from tg_bot_template.config import SCHEDULE_HEALTHCHECK
 from tg_bot_template.bot_content import features
 from tg_bot_template.db_infra import db
 from tg_bot_template.bot_infra.filters import RegistrationFilter, NonRegistrationFilter, CreatorFilter
