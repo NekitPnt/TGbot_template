@@ -27,7 +27,7 @@ dp.filters_factory.bind(NonRegistrationFilter)
 # -------------------------------------------- HANDLERS --------------------------------------------
 @dp.message_handler(lambda message: features.ping_ftr.find_triggers(message))
 async def ping(msg: types.Message):
-    await bot_safe_send_message(msg.from_user.id, features.ping_ftr.text * 1111)
+    await bot_safe_send_message(msg.from_user.id, features.ping_ftr.text)
 
 
 @dp.message_handler(Text(equals=["creator"], ignore_case=True), creator=True)
