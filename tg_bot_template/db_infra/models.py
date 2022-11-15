@@ -16,14 +16,16 @@ database = peewee_async.PooledPostgresqlDatabase(
 
 
 # -------------------------------------------- MODELS --------------------------------------------
-class Users(peewee.Model):
+class BaseModel(peewee.Model):
+    class Meta:
+        database = database
+
+
+class Users(BaseModel):
     id = peewee.PrimaryKeyField(null=False)
     social_id = peewee.BigIntegerField(null=False)
     username = peewee.CharField(max_length=50)
     registration_date = peewee.DateTimeField(null=True)
-
-    class Meta:
-        database = database
 
 
 ALL_TABLES = [Users]
