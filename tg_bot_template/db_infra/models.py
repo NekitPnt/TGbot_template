@@ -1,17 +1,17 @@
 import asyncio
-import os
-
 import peewee
 import peewee_async
 import playhouse.migrate
 from loguru import logger
 
+from tg_bot_template.config import settings
+
 # -------------------------------------------- DB INIT --------------------------------------------
 database = peewee_async.PooledPostgresqlDatabase(
-    os.getenv("POSTGRES_DB", "tg_bot_template"),
-    user=os.getenv("POSTGRES_USER", "tg_bot_template"),
-    password=os.getenv("POSTGRES_PASSWORD", "tg_bot_template"),
-    host=os.getenv("POSTGRES_HOST", "localhost")
+    settings.postgres_db,
+    user=settings.postgres_user,
+    password=settings.postgres_password,
+    host=settings.postgres_host,
 )
 
 

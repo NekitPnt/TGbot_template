@@ -1,10 +1,8 @@
-import os
 from aiogram import types
 from aiogram.dispatcher.filters import BoundFilter
 
+from tg_bot_template.config import settings
 from tg_bot_template.db_infra.db import check_user_registered
-
-CREATOR_ID = os.getenv("CREATOR_ID", None)
 
 
 class AbsFilter(BoundFilter):
@@ -21,7 +19,7 @@ class CreatorFilter(AbsFilter):
     key = "creator"
 
     async def check(self, msg: types.Message):
-        return CREATOR_ID is None or str(msg.from_user.id) == CREATOR_ID
+        return settings.creator_id is None or str(msg.from_user.id) == settings.creator_id
 
 
 class RegistrationFilter(AbsFilter):

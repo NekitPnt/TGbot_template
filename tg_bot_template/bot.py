@@ -9,12 +9,12 @@ from aiogram.dispatcher import Dispatcher, FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.utils import executor
 
-from tg_bot_template.config import SCHEDULE_HEALTHCHECK
+from tg_bot_template.config import settings
 from tg_bot_template.bot_content import features
 from tg_bot_template.db_infra import db
 from tg_bot_template.bot_infra.filters import RegistrationFilter, NonRegistrationFilter, CreatorFilter
 
-bot = Bot(token=os.getenv("TG_BOT_TOKEN"))
+bot = Bot(token=settings.tg_bot_token)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
@@ -108,14 +108,14 @@ async def bot_edit_callback_message(callback: types.CallbackQuery, text: str, **
 # ---------------------------------------- SCHEDULED FEATURES ---------------------------------------
 async def healthcheck():
     logger.info(features.ping_ftr.text2)
-    if (creator_id := os.getenv("CREATOR_ID", None)) is not None:
-        await bot_safe_send_message(int(creator_id), features.ping_ftr.text2)
+    if settings.creator_id is not None:
+        await bot_safe_send_message(int(settings.creator_id), features.ping_ftr.text2)
 
 
 # -------------------------------------------- BOT SETUP --------------------------------------------
 async def bot_scheduler():
     logger.info("Scheduler is up")
-    aioschedule.every().day.at(SCHEDULE_HEALTHCHECK).do(healthcheck)
+    aioschedule.every().day.at(settings.schedule_healthcheck).do(healthcheck)
 
     while True:
         await aioschedule.run_pending()
