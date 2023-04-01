@@ -4,10 +4,11 @@ volumes:
   pg_project:
 
 services:
-  db:
+  pg_db:
     image: postgres:latest
     restart: always
-    container_name: tg_bot_template_db
+    container_name: tg_bot_template_postgres
+    hostname: ${POSTGRES_HOST}
     env_file:
       - .env
     environment:
@@ -19,11 +20,21 @@ services:
     ports:
       - "5432:5432"
 
-  onboarding_bot:
+  redis_fsm:
+    image: redis:latest
+    hostname: ${FSM_REDIS_HOST:-localhost}
+    command: redis-server --requirepass "${FSM_REDIS_PASS:-}"
+    env_file:
+      - .env
+    ports:
+      - "6379:6379"
+
+  tg_bot:
     container_name: tg_bot_template
     build: .
     env_file:
       - .env
     restart: always
     depends_on:
-      - db
+      - pg_db
+      - redis_fsm

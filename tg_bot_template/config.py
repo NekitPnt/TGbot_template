@@ -10,7 +10,12 @@ class BotSettings(BaseSettings):
     postgres_password: str
     postgres_host: str
 
+    fsm_redis_host: Optional[str]
+    fsm_redis_db: Optional[int]
+    fsm_redis_pass: Optional[str]
+
     tg_bot_token: str
+    register_passphrase: Optional[str]
     creator_id: Optional[int]
 
     inline_kb_button_row_width: int = 2

@@ -1,4 +1,4 @@
-FROM python:3.9
+FROM python:3.10
 # set work directory
 WORKDIR /usr/src/tg_bot_template/
 # copy project
