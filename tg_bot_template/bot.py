@@ -227,6 +227,7 @@ async def bot_scheduler():
 
 
 async def on_startup(dispatcher: Dispatcher):
+    from aiopg.sa import Engine
     logger.info("Bot is up")
 
     # bot commands setup

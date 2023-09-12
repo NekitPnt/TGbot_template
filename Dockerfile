@@ -1,10 +1,7 @@
 FROM python:3.10
-# set work directory
-WORKDIR /usr/src/tg_bot_template/
-# copy project
-COPY . /usr/src/tg_bot_template/
-# install dependencies
-#RUN pip install --upgrade pip
-RUN pip install --user -r requirements.txt
-# run app
+
+WORKDIR /app/tg_bot_template/
+COPY . /app/tg_bot_template/
+
+RUN pip install --no-cache-dir -r requirements.txt
 CMD ["python", "-m", "tg_bot_template.bot"]

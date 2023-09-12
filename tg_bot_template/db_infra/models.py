@@ -1,4 +1,6 @@
 import asyncio
+from datetime import datetime
+
 import peewee
 import peewee_async
 import playhouse.migrate
@@ -25,7 +27,7 @@ class Users(BaseModel):
     id = peewee.PrimaryKeyField(null=False)
     social_id = peewee.BigIntegerField(null=False)
     username = peewee.CharField(max_length=50)
-    registration_date = peewee.DateTimeField(null=True)
+    registration_date = peewee.DateTimeField(default=datetime.now)
     taps = peewee.BigIntegerField(default=0)
     name = peewee.TextField(null=True)
     info = peewee.TextField(null=True)
@@ -63,8 +65,8 @@ def make_migrations():
 
 # psql postgresql://tg_bot_template:tg_bot_template@localhost:5432/tg_bot_template
 # dev_drop_tables(database, ALL_TABLES)
-create_tables(database, ALL_TABLES)
-make_migrations()
+# create_tables(database, ALL_TABLES)
+# make_migrations()
 database.close()
 
 # -------------------------------------------- ASYNC MANAGER --------------------------------------------

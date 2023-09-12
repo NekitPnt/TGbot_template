@@ -32,6 +32,7 @@ services:
   tg_bot:
     container_name: tg_bot_template
     build: .
+    # command: bash -c "alembic upgrade head"
     env_file:
       - .env
     restart: always
