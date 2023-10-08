@@ -19,6 +19,7 @@ from tg_bot_template.bot_content import features
 from tg_bot_template.config import settings
 from tg_bot_template.db_infra import db
 from tg_bot_template.bot_infra.filters import RegistrationFilter, NonRegistrationFilter, CreatorFilter
+from tg_bot_template.db_infra.models import setup_db
 
 bot = Bot(token=settings.tg_bot_token)
 storage = RedisStorage2(settings.fsm_redis_host, db=settings.fsm_redis_db, password=settings.fsm_redis_pass) \
@@ -247,4 +248,5 @@ async def on_shutdown(dispatcher: Dispatcher):
 
 
 if __name__ == "__main__":
+    setup_db()
     executor.start_polling(dp, on_startup=on_startup, on_shutdown=on_shutdown)

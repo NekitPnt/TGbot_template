@@ -1,4 +1,3 @@
-import asyncio
 import peewee
 import peewee_async
 import playhouse.migrate
@@ -13,6 +12,7 @@ database = peewee_async.PooledPostgresqlDatabase(
     password=settings.postgres_password,
     host=settings.postgres_host,
 )
+conn = peewee_async.Manager(database)
 
 
 # -------------------------------------------- MODELS --------------------------------------------
@@ -61,17 +61,10 @@ def make_migrations():
         pass
 
 
-# psql postgresql://tg_bot_template:tg_bot_template@localhost:5432/tg_bot_template
-# dev_drop_tables(database, ALL_TABLES)
-create_tables(database, ALL_TABLES)
-make_migrations()
-database.close()
-
-# -------------------------------------------- ASYNC MANAGER --------------------------------------------
-# Create async models manager:
-conn = peewee_async.Manager(database)
-database.set_allow_sync(False)
-
-# run db connect
-loop = asyncio.get_event_loop()
-loop.run_until_complete(database.connect_async(loop=loop))
+def setup_db():
+    # psql postgresql://tg_bot_user:tg_bot_user@localhost:5432/tg_bot_user
+    # dev_drop_tables(database, ALL_TABLES)
+    create_tables(database, ALL_TABLES)
+    make_migrations()
+    database.close()
+    database.set_allow_sync(False)
