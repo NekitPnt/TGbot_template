@@ -48,23 +48,25 @@ def create_tables(db: peewee_async.PooledPostgresqlDatabase, tables: list):
     logger.info("Tables created")
 
 
-def make_migrations():
-    migrator = playhouse.migrate.PostgresqlMigrator(database)
+def make_migrations(db: peewee_async.PooledPostgresqlDatabase):
+    migrator = playhouse.migrate.PostgresqlMigrator(db)
     try:
-        with database.atomic():
+        with db.atomic():
             playhouse.migrate.migrate(
+                # migrator.add_column("users", "social_id", peewee.BigIntegerField(null=True)),
+                # migrator.drop_not_null("users", "name"),
                 # migrator.alter_column_type("users", "social_id", peewee.BigIntegerField(null=False)),
                 # migrator.add_column("users", "channel_id", peewee.CharField(null=False, max_length=50))
             )
         logger.info("Tables migrated")
-    except peewee.ProgrammingError:
-        pass
+    except peewee.ProgrammingError as e:
+        logger.exception(f"Tables migrating error: {str(e)}")
 
 
 def setup_db():
     # psql postgresql://tg_bot_user:tg_bot_user@localhost:5432/tg_bot_user
     # dev_drop_tables(database, ALL_TABLES)
     create_tables(database, ALL_TABLES)
-    make_migrations()
+    make_migrations(database)
     database.close()
     database.set_allow_sync(False)
