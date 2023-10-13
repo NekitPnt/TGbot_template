@@ -1,7 +1,6 @@
 import peewee
 import peewee_async
 import playhouse.migrate
-from aiogram import Dispatcher
 from loguru import logger
 
 from tg_bot_template.config import BotSettings

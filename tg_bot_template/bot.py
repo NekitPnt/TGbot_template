@@ -4,7 +4,7 @@ from aiogram.dispatcher.filters.state import StatesGroup
 from typing import Type
 from loguru import logger
 
-from aiogram import types, Dispatcher
+from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.utils import executor
