@@ -4,27 +4,22 @@ from aiogram.dispatcher.filters.state import StatesGroup
 from typing import Type
 from loguru import logger
 
-from aiogram import Bot, types
-from aiogram.contrib.fsm_storage.redis import RedisStorage2
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from aiogram.dispatcher import Dispatcher, FSMContext
+from aiogram import types, Dispatcher
+from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.utils import executor
 
-from tg_bot_template.bot_content.bot_feature import Feature, InlineButton
+from tg_bot_template import dp
+from tg_bot_template.bot_lib.bot_feature import Feature, InlineButton
 from tg_bot_template.bot_content.errors import Errors
 from tg_bot_template.bot_infra.callbacks import game_cb
 from tg_bot_template.bot_infra.states import UserForm, UserFormData
 from tg_bot_template.bot_content import features
+from tg_bot_template.bot_lib.db_dispatcher import DbDispatcher
 from tg_bot_template.config import settings
-from tg_bot_template.db_infra import db
+from tg_bot_template.db_infra import db, setup_db
 from tg_bot_template.bot_infra.filters import RegistrationFilter, NonRegistrationFilter, CreatorFilter
-from tg_bot_template.db_infra.models import setup_db
-
-bot = Bot(token=settings.tg_bot_token)
-storage = RedisStorage2(settings.fsm_redis_host, db=settings.fsm_redis_db, password=settings.fsm_redis_pass) \
-    if settings.fsm_redis_host else MemoryStorage()
-dp = Dispatcher(bot, storage=storage)
+from tg_bot_template.bot_lib.utils import bot_safe_send_message, bot_safe_send_photo, bot_edit_callback_message
 
 # filters binding
 dp.filters_factory.bind(CreatorFilter)
@@ -35,7 +30,7 @@ dp.filters_factory.bind(NonRegistrationFilter)
 # -------------------------------------------- BASE HANDLERS ----------------------------------------------------------
 @dp.message_handler(lambda message: features.ping_ftr.find_triggers(message))
 async def ping(msg: types.Message):
-    await bot_safe_send_message(msg.from_user.id, features.ping_ftr.text)
+    await bot_safe_send_message(dp, msg.from_user.id, features.ping_ftr.text)
 
 
 @dp.message_handler(lambda message: features.creator_ftr.find_triggers(message), creator=True)
@@ -53,7 +48,7 @@ async def cancel_command(msg: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(Text(equals=features.cancel_ftr.triggers, ignore_case=True), state="*")
 async def cancel_callback(callback: types.CallbackQuery, state: FSMContext):
-    await bot_edit_callback_message(callback, features.cancel_ftr.text)
+    await bot_edit_callback_message(dp, callback, features.cancel_ftr.text)
     if await state.get_state() is not None:
         await state.finish()
     await main_menu(from_user_id=callback.from_user.id)
@@ -61,8 +56,10 @@ async def cancel_callback(callback: types.CallbackQuery, state: FSMContext):
 
 @dp.callback_query_handler(game_cb.filter(action=features.start_ftr.callback_action), registered=True)
 @dp.message_handler(Text(equals=features.start_ftr.triggers, ignore_case=True), registered=True)
-async def start(msg: types.Message):
+async def start(msg: types.Message | types.CallbackQuery):
     await main_menu(from_user_id=msg.from_user.id)
+    if isinstance(msg, types.CallbackQuery):
+        await msg.answer()
 
 
 @dp.message_handler(Text(equals=features.help_ftr.triggers, ignore_case=True), registered=True)
@@ -72,7 +69,7 @@ async def help_feature(msg: types.Message):
 
 async def main_menu(*, from_user_id: int):
     text = f"{features.start_ftr.text}\n\n{features.start_ftr.menu.text}"
-    await bot_safe_send_message(from_user_id, text, reply_markup=features.start_ftr.kb)
+    await bot_safe_send_message(dp, from_user_id, text, reply_markup=features.start_ftr.kb)
 
 
 # -------------------------------------------- PROFILE HANDLERS -------------------------------------------------------
@@ -139,7 +136,7 @@ async def rating(msg: types.Message):
         # best_user = all_users[0]
         text = features.rating_ftr.text2.format(name=best_user.name, username=best_user.username, info=best_user.info)
         await msg.answer(text, reply_markup=features.rating_ftr.kb)
-        await bot_safe_send_photo(msg.from_user.id, best_user.photo, reply_markup=features.rating_ftr.kb)
+        await bot_safe_send_photo(dp, msg.from_user.id, best_user.photo, reply_markup=features.rating_ftr.kb)
 
 
 @dp.message_handler(Text(equals=features.press_button_ftr.triggers, ignore_case=True), registered=True)
@@ -154,7 +151,7 @@ async def count_button_tap(callback: types.CallbackQuery, callback_data: dict):
     new_taps = current_taps + 1
     await db.incr_user_taps(social_id=callback.from_user.id)
     text, keyboard = await update_button_tap(taps=new_taps)
-    await bot_edit_callback_message(callback, text, reply_markup=Feature.create_tg_inline_kb(keyboard))
+    await bot_edit_callback_message(dp, callback, text, reply_markup=Feature.create_tg_inline_kb(keyboard))
 
 
 async def update_button_tap(*, taps: int) -> tuple[str, list[list[InlineButton]]]:
@@ -187,34 +184,11 @@ async def handle_wrong_text_msg(msg: types.Message):
     await msg.answer(Errors.text)
 
 
-async def bot_safe_send_message(social_id: int, text: str, **kwargs):
-    try:
-        text_arr = Feature.tg_msg_text_split(text)
-        for mes in text_arr:
-            await bot.send_message(social_id, mes, **kwargs)
-    except Exception:
-        logger.warning(f"User with {social_id = } did not receive the message.")
-
-
-async def bot_safe_send_photo(social_id: int, photo, **kwargs):
-    try:
-        await bot.send_photo(social_id, photo, **kwargs)
-    except Exception as e:
-        logger.warning(f"User with {social_id = } did not receive the photo.\nError: {e}")
-
-
-async def bot_edit_callback_message(callback: types.CallbackQuery, text: str, **kwargs):
-    try:
-        await bot.edit_message_text(text, callback.from_user.id, callback.message.message_id, **kwargs)
-    except Exception as e:
-        logger.warning(f"Cant edit callback message for {callback = }.\nError: {e}")
-
-
 # ---------------------------------------- SCHEDULED FEATURES ---------------------------------------
 async def healthcheck():
     logger.info(features.ping_ftr.text2)
     if settings.creator_id is not None:
-        await bot_safe_send_message(int(settings.creator_id), features.ping_ftr.text2)
+        await bot_safe_send_message(dp, int(settings.creator_id), features.ping_ftr.text2)
 
 
 # -------------------------------------------- BOT SETUP --------------------------------------------
@@ -227,8 +201,9 @@ async def bot_scheduler():
         await asyncio.sleep(1)
 
 
-async def on_startup(dispatcher: Dispatcher):
+async def on_startup(dispatcher: DbDispatcher):
     logger.info("Bot is up")
+    await bot_safe_send_message(dp, settings.creator_id, "Bot is up")
 
     # bot commands setup
     cmds = Feature.commands_to_set
@@ -242,11 +217,11 @@ async def on_startup(dispatcher: Dispatcher):
     # dispatcher.register_message_handler(cancel_handler, commands=['cancel'], state="*")
 
 
-async def on_shutdown(dispatcher: Dispatcher):
+async def on_shutdown(dispatcher: DbDispatcher):
     await dispatcher.storage.close()
     await dispatcher.storage.wait_closed()
 
 
 if __name__ == "__main__":
-    setup_db()
+    dp.set_db_conn(conn=setup_db(settings))
     executor.start_polling(dp, on_startup=on_startup, on_shutdown=on_shutdown)

@@ -1,4 +1,4 @@
-from tg_bot_template.bot_content.bot_feature import Feature, Button, FeatureMenu, TgUtils
+from tg_bot_template.bot_lib.bot_feature import Feature, Button, FeatureMenu, TgUtils
 from dataclasses import dataclass
 
 

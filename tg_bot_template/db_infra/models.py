@@ -1,27 +1,7 @@
 import peewee
-import peewee_async
-import playhouse.migrate
-from loguru import logger
-
-from tg_bot_template.config import settings
-
-# -------------------------------------------- DB INIT --------------------------------------------
-database = peewee_async.PooledPostgresqlDatabase(
-    settings.postgres_db,
-    user=settings.postgres_user,
-    password=settings.postgres_password,
-    host=settings.postgres_host,
-)
-conn = peewee_async.Manager(database)
 
 
-# -------------------------------------------- MODELS --------------------------------------------
-class BaseModel(peewee.Model):
-    class Meta:
-        database = database
-
-
-class Users(BaseModel):
+class Users(peewee.Model):
     id = peewee.PrimaryKeyField(null=False)
     social_id = peewee.BigIntegerField(null=False)
     username = peewee.CharField(max_length=50)
@@ -30,43 +10,3 @@ class Users(BaseModel):
     name = peewee.TextField(null=True)
     info = peewee.TextField(null=True)
     photo = peewee.TextField(null=True)
-
-
-ALL_TABLES = [Users]
-# -------------------------------------------- MIGRATIONS --------------------------------------------
-
-
-def dev_drop_tables(db: peewee_async.PooledPostgresqlDatabase, tables: list):
-    with db:
-        db.drop_tables(tables, safe=True)
-    logger.info("Tables dropped")
-
-
-def create_tables(db: peewee_async.PooledPostgresqlDatabase, tables: list):
-    with db:
-        db.create_tables(tables, safe=True)
-    logger.info("Tables created")
-
-
-def make_migrations(db: peewee_async.PooledPostgresqlDatabase):
-    migrator = playhouse.migrate.PostgresqlMigrator(db)
-    try:
-        with db.atomic():
-            playhouse.migrate.migrate(
-                # migrator.add_column("users", "social_id", peewee.BigIntegerField(null=True)),
-                # migrator.drop_not_null("users", "name"),
-                # migrator.alter_column_type("users", "social_id", peewee.BigIntegerField(null=False)),
-                # migrator.add_column("users", "channel_id", peewee.CharField(null=False, max_length=50))
-            )
-        logger.info("Tables migrated")
-    except peewee.ProgrammingError as e:
-        logger.exception(f"Tables migrating error: {str(e)}")
-
-
-def setup_db():
-    # psql postgresql://tg_bot_user:tg_bot_user@localhost:5432/tg_bot_user
-    # dev_drop_tables(database, ALL_TABLES)
-    create_tables(database, ALL_TABLES)
-    make_migrations(database)
-    database.close()
-    database.set_allow_sync(False)
