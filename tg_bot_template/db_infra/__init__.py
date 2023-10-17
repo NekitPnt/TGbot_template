@@ -1,3 +1,4 @@
+import inspect
 import peewee
 import peewee_async
 import playhouse.migrate
@@ -6,7 +7,7 @@ from loguru import logger
 from tg_bot_template.config import BotSettings
 from tg_bot_template.db_infra.models import Users
 
-ALL_TABLES = [Users]
+ALL_TABLES = [data for _, data in inspect.getmembers(models) if isinstance(data, type)]
 
 
 def _dev_drop_tables(database: peewee_async.PooledPostgresqlDatabase, tables: list):
