@@ -10,7 +10,7 @@ from aiogram.dispatcher.filters import Text
 from aiogram.utils import executor
 
 from tg_bot_template import dp
-from tg_bot_template.bot_lib.bot_feature import Feature, InlineButton
+from tg_bot_template.bot_lib.bot_feature import Feature, InlineButton, TgUser
 from tg_bot_template.bot_content.errors import Errors
 from tg_bot_template.bot_infra.callbacks import game_cb
 from tg_bot_template.bot_infra.states import UserForm, UserFormData
@@ -104,7 +104,8 @@ async def add_form_photo(msg: types.Message, state: FSMContext):
             info=data[features.set_user_about.data_key],
             photo=msg.photo[-1].file_id
         )
-        await db.update_user_info(social_id=msg.from_user.id, user_form_data=user_form_data)
+        tg_user = TgUser(tg_id=msg.from_user.id, username=msg.from_user.username)
+        await db.update_user_info(tg_user=tg_user, user_form_data=user_form_data)
     await state.finish()
     await msg.answer(features.set_user_info.text2, reply_markup=features.set_user_info.kb)
 
@@ -127,7 +128,7 @@ async def error_form_photo(msg: types.Message):
 # -------------------------------------------- GAME HANDLERS ----------------------------------------------------------
 @dp.message_handler(Text(equals=features.rating_ftr.triggers, ignore_case=True), registered=True)
 async def rating(msg: types.Message):
-    user = await db.get_user(user_social_id=msg.from_user.id)
+    user = await db.get_user(tg_user=TgUser(tg_id=msg.from_user.id, username=msg.from_user.username))
     all_users = await db.get_all_users()
     total_taps = sum([i.taps for i in all_users])
     text = features.rating_ftr.text.format(user_taps=user.taps, total_taps=total_taps)
@@ -149,7 +150,7 @@ async def send_press_button(msg: types.Message):
 async def count_button_tap(callback: types.CallbackQuery, callback_data: dict):
     current_taps = int(callback_data["taps"])
     new_taps = current_taps + 1
-    await db.incr_user_taps(social_id=callback.from_user.id)
+    await db.incr_user_taps(tg_user=TgUser(tg_id=callback.from_user.id, username=callback.from_user.username))
     text, keyboard = await update_button_tap(taps=new_taps)
     await bot_edit_callback_message(dp, callback, text, reply_markup=Feature.create_tg_inline_kb(keyboard))
 
@@ -174,7 +175,7 @@ async def registration(msg: types.Message):
         if not msg.from_user.username:
             return await msg.answer(Errors.register_failed, reply_markup=features.empty.kb)
     # user registration
-    await db.create_user(user_social_id=msg.from_user.id, username=msg.from_user.username)
+    await db.create_user(tg_user=TgUser(tg_id=msg.from_user.id, username=msg.from_user.username))
     await msg.answer(features.register_ftr.text)
     await main_menu(from_user_id=msg.from_user.id)
 

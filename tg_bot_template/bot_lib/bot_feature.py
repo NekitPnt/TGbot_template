@@ -18,6 +18,11 @@ class TgUtils:
     t_me_link: str = "https://t.me/"
 
 
+class TgUser(BaseModel):
+    tg_id: int
+    username: str | None
+
+
 class Button(BaseModel):
     text: str
 

@@ -1,12 +1,11 @@
 from datetime import datetime
-from typing import Optional
-
 from aiocache import cached
 from aiocache.serializers import PickleSerializer
 from loguru import logger
 
 from tg_bot_template import dp
 from tg_bot_template.bot_infra.states import UserFormData
+from tg_bot_template.bot_lib.bot_feature import TgUser
 from tg_bot_template.db_infra.models import Users
 
 
@@ -15,35 +14,34 @@ def _get_conn():
 
 
 @cached(ttl=0.2, serializer=PickleSerializer())
-async def check_user_registered(*, user_social_id: int) -> bool:
-    user = await get_user(user_social_id=user_social_id)
-    logger.info(f"Checked user db id = {user}, registration is {bool(user)}")
-    return bool(user)
+async def check_user_registered(*, tg_user: TgUser) -> bool:
+    return bool(await get_user(tg_user=tg_user))
 
 
-async def get_user(*, user_social_id: int) -> Optional[Users]:
+async def get_user(*, tg_user: TgUser) -> Users | None:
     try:
-        user = await _get_conn().get(Users, social_id=user_social_id)
-        return user
+        user = await _get_conn().get(Users, social_id=tg_user.tg_id)
+        user.username = tg_user.username
+        return await _get_conn().update(user)
     except Exception:
         return None
 
 
-async def create_user(*, user_social_id: int, username: str) -> None:
-    await _get_conn().create(Users, social_id=user_social_id, username=username, registration_date=datetime.now())
-    logger.info(f"New user[{username}] registered")
+async def create_user(*, tg_user: TgUser) -> None:
+    await _get_conn().create(Users, social_id=tg_user.tg_id, username=tg_user.username, registration_date=datetime.now())
+    logger.info(f"New user[{tg_user.username}] registered")
 
 
-async def update_user_info(*, social_id: int, user_form_data: UserFormData) -> None:
-    user = await get_user(user_social_id=social_id)
+async def update_user_info(*, tg_user: TgUser, user_form_data: UserFormData) -> None:
+    user = await get_user(tg_user=tg_user)
     user.name = user_form_data.name
     user.info = user_form_data.info
     user.photo = user_form_data.photo
     await _get_conn().update(user)
 
 
-async def incr_user_taps(*, social_id: int) -> None:
-    user = await get_user(user_social_id=social_id)
+async def incr_user_taps(*, tg_user: TgUser) -> None:
+    user = await get_user(tg_user=tg_user)
     user.taps += 1
     await _get_conn().update(user)
 
