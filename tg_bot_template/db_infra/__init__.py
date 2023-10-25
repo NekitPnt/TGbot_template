@@ -1,4 +1,5 @@
 import inspect
+
 import peewee
 import peewee_async
 import playhouse.migrate

@@ -1,7 +1,7 @@
 from aiogram import types
 from loguru import logger
 
-from .db_dispatcher import DbDispatcher
+from .aiogram_overloads import DbDispatcher
 from .bot_feature import Feature
 
 
@@ -12,6 +12,13 @@ async def bot_safe_send_message(dp: DbDispatcher, social_id: int, text: str, **k
             await dp.bot.send_message(social_id, mes, **kwargs)
     except Exception:
         logger.warning(f"User with {social_id = } did not receive the message.")
+
+
+async def bot_safe_delete_message(dp: DbDispatcher, chat_id: int, message_id: int):
+    try:
+        await dp.bot.delete_message(chat_id, message_id)
+    except Exception:
+        logger.warning(f"Delete message {message_id} from chat {chat_id} failed.")
 
 
 async def bot_safe_send_photo(dp: DbDispatcher, social_id: int, photo, **kwargs):

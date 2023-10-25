@@ -15,7 +15,7 @@ from tg_bot_template.bot_content.errors import Errors
 from tg_bot_template.bot_infra.callbacks import game_cb
 from tg_bot_template.bot_infra.states import UserForm, UserFormData
 from tg_bot_template.bot_content import features
-from tg_bot_template.bot_lib.db_dispatcher import DbDispatcher
+from tg_bot_template.bot_lib.aiogram_overloads import DbDispatcher
 from tg_bot_template.config import settings
 from tg_bot_template.db_infra import db, setup_db
 from tg_bot_template.bot_infra.filters import RegistrationFilter, NonRegistrationFilter, CreatorFilter

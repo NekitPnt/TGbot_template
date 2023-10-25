@@ -1,18 +1,9 @@
 from aiogram import types
-from aiogram.dispatcher.filters import BoundFilter
 
+from tg_bot_template.bot_lib.aiogram_overloads import AbsFilter
+from tg_bot_template.bot_lib.bot_feature import TgUser
 from tg_bot_template.config import settings
 from tg_bot_template.db_infra.db import check_user_registered
-
-
-class AbsFilter(BoundFilter):
-    key = "key"
-
-    def __init__(self, **kwargs):
-        setattr(self, self.key, kwargs[self.key])
-
-    async def check(self, msg: types.Message):
-        return True
 
 
 class CreatorFilter(AbsFilter):
@@ -26,11 +17,11 @@ class RegistrationFilter(AbsFilter):
     key = "registered"
 
     async def check(self, msg: types.Message):
-        return await check_user_registered(user_social_id=msg.from_user.id)
+        return await check_user_registered(tg_user=TgUser(tg_id=msg.from_user.id, username=msg.from_user.username))
 
 
 class NonRegistrationFilter(AbsFilter):
     key = "not_registered"
 
     async def check(self, msg: types.Message):
-        return not await check_user_registered(user_social_id=msg.from_user.id)
+        return not await check_user_registered(tg_user=TgUser(tg_id=msg.from_user.id, username=msg.from_user.username))

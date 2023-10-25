@@ -22,7 +22,8 @@ async def get_user(*, tg_user: TgUser) -> Users | None:
     try:
         user = await _get_conn().get(Users, social_id=tg_user.tg_id)
         user.username = tg_user.username
-        return await _get_conn().update(user)
+        await _get_conn().update(user)
+        return user
     except Exception:
         return None
 
