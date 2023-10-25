@@ -8,7 +8,7 @@ from loguru import logger
 from tg_bot_template.config import BotSettings
 from tg_bot_template.db_infra import models
 
-ALL_TABLES = [data for _, data in inspect.getmembers(models) if isinstance(data, type)]
+ALL_TABLES = [data for _, data in inspect.getmembers(models) if isinstance(data, peewee.ModelBase)]
 
 
 def _dev_drop_tables(database: peewee_async.PooledPostgresqlDatabase, tables: list):
