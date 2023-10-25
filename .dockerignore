@@ -1,0 +1,13 @@
+.mypy_cache
+.pytest_cache
+.venv
+.vscode
+.idea
+__pycache__/
+venv
+Dockerfile
+.env
+.dockerignore
+.gitignore
+.gitlab-ci.yml
+docker-compose.yml

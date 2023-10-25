@@ -1,8 +1,8 @@
 from aiogram import types
 from loguru import logger
 
-from tg_bot_template.bot_lib.db_dispatcher import DbDispatcher
-from tg_bot_template.bot_lib.bot_feature import Feature
+from .db_dispatcher import DbDispatcher
+from .bot_feature import Feature
 
 
 async def bot_safe_send_message(dp: DbDispatcher, social_id: int, text: str, **kwargs):
