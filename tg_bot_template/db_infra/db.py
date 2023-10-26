@@ -13,9 +13,13 @@ def _get_conn():
     return dp.get_db_conn()
 
 
-@cached(ttl=0.2, serializer=PickleSerializer())
 async def check_user_registered(*, tg_user: TgUser) -> bool:
-    return bool(await get_user(tg_user=tg_user))
+    return bool(await get_user_for_filters(tg_user=tg_user))
+
+
+@cached(ttl=0.2, serializer=PickleSerializer())
+async def get_user_for_filters(*, tg_user: TgUser) -> Users | None:
+    return await get_user(tg_user=tg_user)
 
 
 async def get_user(*, tg_user: TgUser) -> Users | None:

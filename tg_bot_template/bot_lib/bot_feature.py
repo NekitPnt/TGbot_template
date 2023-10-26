@@ -47,6 +47,7 @@ class Feature(ClassWithRepr):
             text: Optional[str] = None,
             text2: Optional[str] = None,
             about: Optional[str] = None,
+            error: Optional[str] = None,
             help_text: Optional[str] = None,
             emoji: Optional[str] = None,
             slashed_command: Optional[str] = None,
@@ -64,6 +65,7 @@ class Feature(ClassWithRepr):
         self.text = text
         self.text2 = text2
         self.about = about
+        self.error = error
         self.help_text = help_text
         self.emoji = emoji if emoji is not None else ""
         self.slashed_command = slashed_command
