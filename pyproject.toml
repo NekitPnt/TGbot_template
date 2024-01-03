@@ -2,7 +2,7 @@
 name = "tgbot-template"
 version = "0.1.0"
 description = "simple template for tg bot via aiogram"
-authors = ["NekitPnt  <panatikin@gmail.com>"]
+authors = ["NekitPnt <panatikin@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
