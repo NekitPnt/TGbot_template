@@ -1,5 +1,6 @@
-from pydantic import BaseSettings
 from enum import Enum
+
+from pydantic import BaseSettings
 
 
 class Envs(Enum):

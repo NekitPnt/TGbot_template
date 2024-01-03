@@ -9,9 +9,6 @@ setup:
 setup-pre-commit:
 	@poetry run pre-commit install
 
-format:
-	@poetry run black $(SERVICE_DIR)/ tests/
-
 lint:
 	@printf "${TXT_BOLD}${TXT_MAGENTA}========================== BLACK ==============================${TXT_RESET}\n"
 	@poetry run black $(SERVICE_DIR)/

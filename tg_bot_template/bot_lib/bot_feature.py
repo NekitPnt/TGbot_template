@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Union, Optional
+from dataclasses import dataclass
+
 from aiogram import types
 from pydantic import BaseModel
-from dataclasses import dataclass
 
 
 class ClassWithRepr:
@@ -29,13 +29,13 @@ class Button(BaseModel):
 
 class InlineButton(BaseModel):
     text: str
-    callback_data: Optional[str]
+    callback_data: str | None
 
 
 @dataclass
 class FeatureMenu:
     grid: list[list[Feature]]
-    text: Optional[str] = None
+    text: str | None = None
 
 
 class Feature(ClassWithRepr):
@@ -44,22 +44,22 @@ class Feature(ClassWithRepr):
     def __init__(
         self,
         *,
-        text: Optional[str] = None,
-        text2: Optional[str] = None,
-        about: Optional[str] = None,
-        error: Optional[str] = None,
-        help_text: Optional[str] = None,
-        emoji: Optional[str] = None,
-        slashed_command: Optional[str] = None,
-        slashed_command_descr: Optional[str] = None,
-        button: Optional[str] = None,
-        commands: Optional[list[str]] = None,
-        keyboard: Optional[list[list[Button]]] = None,
-        inline_keyboard: Optional[list[list[InlineButton]]] = None,
-        one_time_keyboard: Optional[bool] = False,
-        callback_action: Optional[str] = None,
-        data_key: Optional[str] = None,
-        menu: Optional[FeatureMenu] = None,  # need attrs: self.button, self.slashed_command and self.about
+        text: str | None = None,
+        text2: str | None = None,
+        about: str | None = None,
+        error: str | None = None,
+        help_text: str | None = None,
+        emoji: str | None = None,
+        slashed_command: str | None = None,
+        slashed_command_descr: str | None = None,
+        button: str | None = None,
+        commands: list[str] | None = None,
+        keyboard: list[list[Button]] | None = None,
+        inline_keyboard: list[list[InlineButton]] | None = None,
+        one_time_keyboard: bool = False,
+        callback_action: str | None = None,
+        data_key: str | None = None,
+        menu: FeatureMenu | None = None,  # need attrs: self.button, self.slashed_command and self.about
         set_to_bot_commands: bool = False,  # need attrs: self.slashed_command and self.slashed_command_descr
     ):
         self.text = text
@@ -91,7 +91,7 @@ class Feature(ClassWithRepr):
             self.commands_to_set.append(self)
 
     def find_triggers(self, message: types.Message) -> bool:
-        return message.text and any([i in message.text.lower() for i in self.triggers])
+        return message.text and any(i in message.text.lower() for i in self.triggers)
 
     def menu_line(self) -> str:
         if self.slashed_command is None or self.about is None:
@@ -112,17 +112,22 @@ class Feature(ClassWithRepr):
         return _triggers
 
     @property
-    def kb(self) -> Union[types.ReplyKeyboardMarkup, types.ReplyKeyboardRemove]:
+    def kb(self) -> types.ReplyKeyboardMarkup | types.ReplyKeyboardRemove:
         return self.create_tg_kb(self.keyboard, self.one_time_keyboard)
 
     @property
     def inline_kb(self) -> types.InlineKeyboardMarkup:
+        if self.inline_keyboard is None:
+            raise AttributeError(
+                'Argument 1 "self.inline_keyboard" to "create_tg_inline_kb" of "Feature" has incompatible type '
+                '"list[list[InlineButton]] | None"; expected "list[list[InlineButton]]"'
+            )
         return self.create_tg_inline_kb(self.inline_keyboard)
 
     @staticmethod
     def create_tg_kb(
-        input_kb: Optional[list[list[Button]]], one_time_keyboard: bool = False
-    ) -> Union[types.ReplyKeyboardMarkup, types.ReplyKeyboardRemove]:
+        input_kb: list[list[Button]] | None, one_time_keyboard: bool = False
+    ) -> types.ReplyKeyboardMarkup | types.ReplyKeyboardRemove:
         if not input_kb:
             return types.ReplyKeyboardRemove()
         res_kb = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=one_time_keyboard)
@@ -143,7 +148,7 @@ class Feature(ClassWithRepr):
 
     @classmethod
     def tg_msg_text_split(cls, text: str) -> list[str]:
-        return [mes for mes in cls.text_cutter(text, 4096)]
+        return cls.text_cutter(text, 4096)
 
     @staticmethod
     def tg_get_username(text: str) -> str:

@@ -11,27 +11,26 @@ from tg_bot_template.db_infra import models
 ALL_TABLES = [data for _, data in inspect.getmembers(models) if isinstance(data, peewee.ModelBase)]
 
 
-def _dev_drop_tables(database: peewee_async.PooledPostgresqlDatabase, tables: list):
+def _dev_drop_tables(database: peewee_async.PooledPostgresqlDatabase, tables: list[peewee.ModelBase]) -> None:
     with database:
         database.drop_tables(tables, safe=True)
     logger.info("Tables dropped")
 
 
-def _create_tables(database: peewee_async.PooledPostgresqlDatabase, tables: list):
+def _create_tables(database: peewee_async.PooledPostgresqlDatabase, tables: list[peewee.ModelBase]) -> None:
     with database:
         database.create_tables(tables, safe=True)
     logger.info("Tables created")
 
 
-def _make_migrations(database: peewee_async.PooledPostgresqlDatabase):
-    migrator = playhouse.migrate.PostgresqlMigrator(database)
+def _make_migrations(database: peewee_async.PooledPostgresqlDatabase) -> None:
+    migrator = playhouse.migrate.PostgresqlMigrator(database)  # noqa: F841
     try:
         with database.atomic():
             playhouse.migrate.migrate(
-                # migrator.add_column("users", "social_id", peewee.BigIntegerField(null=True)),
-                # migrator.drop_not_null("users", "name"),
-                # migrator.alter_column_type("users", "social_id", peewee.BigIntegerField(null=False)),
-                # migrator.add_column("users", "channel_id", peewee.CharField(null=False, max_length=50))
+                # migrator.add_column("users", "social_id", peewee.BigIntegerField(null=True)),  # noqa: ERA001
+                # migrator.drop_not_null("users", "name"),  # noqa: ERA001
+                # migrator.alter_column_type("users", "social_id", peewee.BigIntegerField(null=False)),  # noqa: ERA001
             )
         logger.info("Tables migrated")
     except peewee.ProgrammingError as e:
@@ -50,7 +49,7 @@ def setup_db(settings: BotSettings) -> peewee_async.Manager:
     database.bind(ALL_TABLES)
 
     # ---------------- MIGRATIONS ----------------
-    # _dev_drop_tables(database, ALL_TABLES)
+    # _dev_drop_tables(database, ALL_TABLES)  # noqa: ERA001
     _create_tables(database, ALL_TABLES)
     _make_migrations(database)
 
