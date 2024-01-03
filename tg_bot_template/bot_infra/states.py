@@ -9,7 +9,7 @@ class UserFormData:
     photo: str
 
 
-class UserForm(StatesGroup):
+class UserForm(StatesGroup):  # type: ignore[misc]
     name = State()
     info = State()
     photo = State()

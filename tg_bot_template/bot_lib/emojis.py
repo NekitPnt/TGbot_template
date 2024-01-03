@@ -4,7 +4,7 @@ from dataclasses import dataclass
 @dataclass
 class Emojis:
     dangerous: str = "⚠️"
-    on_off: tuple = ("🔴️", "🟢")
+    on_off: tuple[str, str] = ("🔴️", "🟢")
     on: str = "🟢"
     off: str = "🔴️"
     none: str = "🚫"

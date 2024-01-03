@@ -33,7 +33,9 @@ async def get_user(*, tg_user: TgUser) -> Users | None:
 
 
 async def create_user(*, tg_user: TgUser) -> None:
-    await _get_conn().create(Users, social_id=tg_user.tg_id, username=tg_user.username, registration_date=datetime.now())
+    await _get_conn().create(
+        Users, social_id=tg_user.tg_id, username=tg_user.username, registration_date=datetime.now()
+    )
     logger.info(f"New user[{tg_user.username}] registered")
 
 

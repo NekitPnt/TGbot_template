@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 
 class ClassWithRepr:
-    def __repr__(self):
+    def __repr__(self) -> str:
         attrs = ", ".join(f"{k}={repr(v)}" for k, v in self.__dict__.items() if v is not None)
         return f"{type(self).__name__}({attrs})"
 
@@ -42,25 +42,25 @@ class Feature(ClassWithRepr):
     commands_to_set: list[Feature] = []
 
     def __init__(
-            self,
-            *,
-            text: Optional[str] = None,
-            text2: Optional[str] = None,
-            about: Optional[str] = None,
-            error: Optional[str] = None,
-            help_text: Optional[str] = None,
-            emoji: Optional[str] = None,
-            slashed_command: Optional[str] = None,
-            slashed_command_descr: Optional[str] = None,
-            button: Optional[str] = None,
-            commands: Optional[list[str]] = None,
-            keyboard: Optional[list[list[Button]]] = None,
-            inline_keyboard: Optional[list[list[InlineButton]]] = None,
-            one_time_keyboard: Optional[bool] = False,
-            callback_action: Optional[str] = None,
-            data_key: Optional[str] = None,
-            menu: Optional[FeatureMenu] = None,  # need attrs: self.button, self.slashed_command and self.about
-            set_to_bot_commands: bool = False  # need attrs: self.slashed_command and self.slashed_command_descr
+        self,
+        *,
+        text: Optional[str] = None,
+        text2: Optional[str] = None,
+        about: Optional[str] = None,
+        error: Optional[str] = None,
+        help_text: Optional[str] = None,
+        emoji: Optional[str] = None,
+        slashed_command: Optional[str] = None,
+        slashed_command_descr: Optional[str] = None,
+        button: Optional[str] = None,
+        commands: Optional[list[str]] = None,
+        keyboard: Optional[list[list[Button]]] = None,
+        inline_keyboard: Optional[list[list[InlineButton]]] = None,
+        one_time_keyboard: Optional[bool] = False,
+        callback_action: Optional[str] = None,
+        data_key: Optional[str] = None,
+        menu: Optional[FeatureMenu] = None,  # need attrs: self.button, self.slashed_command and self.about
+        set_to_bot_commands: bool = False,  # need attrs: self.slashed_command and self.slashed_command_descr
     ):
         self.text = text
         self.text2 = text2
@@ -90,7 +90,7 @@ class Feature(ClassWithRepr):
                 raise AttributeError("slashed_command and slashed_command_descr fields must be set")
             self.commands_to_set.append(self)
 
-    def find_triggers(self, message: types.Message):
+    def find_triggers(self, message: types.Message) -> bool:
         return message.text and any([i in message.text.lower() for i in self.triggers])
 
     def menu_line(self) -> str:
@@ -121,8 +121,7 @@ class Feature(ClassWithRepr):
 
     @staticmethod
     def create_tg_kb(
-            input_kb: Optional[list[list[Button]]],
-            one_time_keyboard: bool = False
+        input_kb: Optional[list[list[Button]]], one_time_keyboard: bool = False
     ) -> Union[types.ReplyKeyboardMarkup, types.ReplyKeyboardRemove]:
         if not input_kb:
             return types.ReplyKeyboardRemove()
@@ -140,7 +139,7 @@ class Feature(ClassWithRepr):
 
     @staticmethod
     def text_cutter(text: str, text_size: int) -> list[str]:
-        return [text[x:x + text_size] for x in range(0, len(text), text_size)]
+        return [text[x : x + text_size] for x in range(0, len(text), text_size)]
 
     @classmethod
     def tg_msg_text_split(cls, text: str) -> list[str]:

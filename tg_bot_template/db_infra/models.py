@@ -1,7 +1,7 @@
 import peewee
 
 
-class Users(peewee.Model):
+class Users(peewee.Model):  # type: ignore[misc]
     id = peewee.PrimaryKeyField(null=False)
     social_id = peewee.BigIntegerField(null=False)
     username = peewee.CharField(max_length=50)

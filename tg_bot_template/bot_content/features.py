@@ -27,14 +27,8 @@ set_user_info = Feature(
     text2="Готово, данные обновлены.",
     set_to_bot_commands=True,
 )
-set_user_name = Feature(
-    text="Отлично, записал. Теперь немного расскажите о себе.",
-    data_key="name"
-)
-set_user_about = Feature(
-    text="Отлично, записал. Теперь скиньте свое фото.",
-    data_key="info"
-)
+set_user_name = Feature(text="Отлично, записал. Теперь немного расскажите о себе.", data_key="name")
+set_user_about = Feature(text="Отлично, записал. Теперь скиньте свое фото.", data_key="info")
 press_button_ftr = Feature(
     slashed_command="/push_the_button",
     slashed_command_descr="we gonna push the button",
@@ -72,9 +66,7 @@ help_ftr = Feature(
     text="Бот для соревнования по тыканью по кнопке. Тыкай в кнопку и побеждай!",
     set_to_bot_commands=True,
 )
-register_ftr = Feature(
-    text="Welcome to bot"
-)
+register_ftr = Feature(text="Welcome to bot")
 cancel_ftr = Feature(
     slashed_command="/cancel",
     button="Отмена",

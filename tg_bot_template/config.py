@@ -1,4 +1,3 @@
-from typing import Optional
 from pydantic import BaseSettings
 from enum import Enum
 
@@ -12,17 +11,17 @@ class Envs(Enum):
 class BotSettings(BaseSettings):
     tg_bot_token: str
 
-    postgres_db: Optional[str]
-    postgres_user: Optional[str]
-    postgres_password: Optional[str]
-    postgres_host: Optional[str]
+    postgres_db: str | None
+    postgres_user: str | None
+    postgres_password: str | None
+    postgres_host: str | None
 
-    fsm_redis_host: Optional[str]
-    fsm_redis_db: Optional[int]
-    fsm_redis_pass: Optional[str]
+    fsm_redis_host: str | None
+    fsm_redis_db: int | None
+    fsm_redis_pass: str | None
 
-    register_passphrase: Optional[str]
-    creator_id: Optional[int]
+    register_passphrase: str | None
+    creator_id: int | None
 
     environment: Envs = Envs.local_test
 

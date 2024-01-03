@@ -102,7 +102,7 @@ async def add_form_photo(msg: types.Message, state: FSMContext):
         user_form_data = UserFormData(
             name=data[features.set_user_name.data_key],
             info=data[features.set_user_about.data_key],
-            photo=msg.photo[-1].file_id
+            photo=msg.photo[-1].file_id,
         )
         tg_user = TgUser(tg_id=msg.from_user.id, username=msg.from_user.username)
         await db.update_user_info(tg_user=tg_user, user_form_data=user_form_data)
@@ -158,10 +158,18 @@ async def count_button_tap(callback: types.CallbackQuery, callback_data: dict):
 async def update_button_tap(*, taps: int) -> tuple[str, list[list[InlineButton]]]:
     text = features.press_button_ftr.text.format(last_session=taps)
     keyboard = [
-        [InlineButton(text=features.press_button_ftr.button,
-                      callback_data=game_cb.new(action=features.press_button_ftr.callback_action, taps=taps))],
-        [InlineButton(text=features.start_ftr.button,
-                      callback_data=game_cb.new(action=features.start_ftr.callback_action, taps=taps))],
+        [
+            InlineButton(
+                text=features.press_button_ftr.button,
+                callback_data=game_cb.new(action=features.press_button_ftr.callback_action, taps=taps),
+            )
+        ],
+        [
+            InlineButton(
+                text=features.start_ftr.button,
+                callback_data=game_cb.new(action=features.start_ftr.callback_action, taps=taps),
+            )
+        ],
     ]
     return text, keyboard
 
