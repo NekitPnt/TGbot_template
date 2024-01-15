@@ -195,6 +195,11 @@ async def handle_wrong_text_msg(msg: types.Message) -> None:
     await msg.answer(Errors.text)
 
 
+@dp.my_chat_member_handler()
+async def handle_my_chat_member_handlers(msg: types.Message):
+    logger.info(msg)  # уведомление о блокировке
+
+
 # ---------------------------------------- SCHEDULED FEATURES ---------------------------------------
 async def healthcheck() -> None:
     logger.info(features.ping_ftr.text2)
