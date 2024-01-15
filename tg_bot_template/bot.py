@@ -7,6 +7,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import StatesGroup
 from aiogram.utils import executor
+from aiogram.utils.exceptions import RetryAfter, BotBlocked
 from loguru import logger
 
 from . import dp
@@ -192,12 +193,21 @@ async def registration(msg: types.Message) -> types.Message | None:
 
 @dp.message_handler(content_types=["any"], registered=True)
 async def handle_wrong_text_msg(msg: types.Message) -> None:
-    await msg.answer(Errors.text)
+    await asyncio.sleep(2)
+    await msg.reply(Errors.text)
 
 
 @dp.my_chat_member_handler()
 async def handle_my_chat_member_handlers(msg: types.Message):
     logger.info(msg)  # уведомление о блокировке
+
+
+@dp.errors_handler(exception=BotBlocked)
+async def exception_handler(update: types.Update, exception: BotBlocked):
+    # работает только для хендлеров бота, для шедулера не работает
+    logger.info(update.message.from_user.id)  # уведомление о блокировке
+    logger.info(exception)  # уведомление о блокировке
+    return True
 
 
 # ---------------------------------------- SCHEDULED FEATURES ---------------------------------------
